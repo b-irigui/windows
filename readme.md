@@ -29,25 +29,33 @@ Windows inside a Docker container.
 ##### Via Docker Compose:
 
 ```yaml
+version: "3.3"
 services:
   windows:
     image: dockurr/windows
     container_name: windows
     environment:
-      VERSION: "11"
+      VERSION: "11"              # Versão do Windows (11, 10, 11l, 10l, etc.)
+      RAM_SIZE: "16G"             # Quantidade de RAM
+      CPU_CORES: "8"             # Número de cores de CPU
+      DISK_SIZE: "256G"           # Tamanho do disco
+      USERNAME: "Docker"         # Usuário padrão
+      PASSWORD: "admin"          # Senha padrão
     devices:
-      - /dev/kvm
-      - /dev/net/tun
+      - /dev/kvm                 # Aceleração KVM (Linux only)
+      - /dev/net/tun             # Para rede
     cap_add:
-      - NET_ADMIN
+      - NET_ADMIN                # Permissões de rede
     ports:
-      - 8006:8006
-      - 3389:3389/tcp
-      - 3389:3389/udp
+      - 8006:8006                # Interface web
+      - 3389:3389/tcp            # RDP TCP
+      - 3389:3389/udp            # RDP UDP
     volumes:
-      - ./windows:/storage
-    restart: always
-    stop_grace_period: 2m
+      - ./windows:/storage       # Armazenamento persistente
+      - ./shared:/shared         # Pasta compartilhada (opcional)
+    restart: unless-stopped
+    privileged: true
+    stop_grace_period: 2m        # Tempo para desligamento gracioso
 ```
 
 ##### Via Docker CLI:
@@ -410,3 +418,15 @@ kubectl apply -f https://raw.githubusercontent.com/dockur/windows/refs/heads/mas
 [Pulls]: https://img.shields.io/docker/pulls/dockurr/windows.svg?style=flat&label=pulls&logo=docker
 [Version]: https://img.shields.io/docker/v/dockurr/windows/latest?arch=amd64&sort=semver&color=066da5
 [Package]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fipitio.github.io%2Fbackage%2Fdockur%2Fwindows%2Fwindows.json&query=%24.downloads&logo=github&style=flat&color=066da5&label=pulls
+
+
+# deletar particao dod disk 
+```bash
+diskpart
+list disk 
+select disk 1
+list partition
+select partition 4 
+DELETE PARTITION OVERRIDE
+
+```
